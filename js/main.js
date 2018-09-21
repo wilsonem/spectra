@@ -88,6 +88,48 @@ function sortByYear() {
   });
 }
 
+function alphabetize() {
+  $("#rand-sort").removeClass("active");
+  $("#abc-sort").addClass("active");
+  $("#year-sort").removeClass("active");
+  $("#wall").removeClass("columns");
+  img = [];
+  $("#wall").empty();
+
+  var nameOrder = firebase.database().ref('blocks').orderByChild('last_name');
+
+  nameOrder.once('value',function(snapshot) {
+    snapshot.forEach(function(childSnapshot) {
+      console.log(childSnapshot.val().grad_year);
+      var info = {url:childSnapshot.val().block_img, key:childSnapshot.key, ln:childSnapshot.val().last_name}
+      img.push(info);
+    });
+  }).then(() => {
+    var firstLetter = img[0].ln.charAt(0);
+    while (img.length > 0) {
+      if (img[0].ln.charAt(0) == firstLetter && img.length > 0) {
+        document.getElementById("wall").innerHTML += ("<h3 class='ml-2 mb-1'>" + firstLetter + "</h3>");
+        document.getElementById("wall").innerHTML += ("<div class='line px-3 mb-2'></div>");
+        document.getElementById("wall").innerHTML += ("<div id='" + firstLetter + "-div' class='year-div columns mb-4'>");
+        while(img.length > 0 && firstLetter == img[0].ln.charAt(0)) {
+          var url = img[0].url;
+          var key = img[0].key;
+          document.getElementById(firstLetter + "-div").innerHTML += ("<img src='" + url + "' id='" + key + "' + class='brick hvr-grow' onclick='showDetails(" + JSON.stringify(key) + ")' >");
+          img.splice(0, 1);
+        }
+        document.getElementById("wall").innerHTML += ("</div>");
+      } else if (firstLetter == "") {
+        firstLetter = 'A';
+      }else{
+        if (firstLetter == "Z") {
+          break;
+        }
+        firstLetter = String.fromCharCode(firstLetter.charCodeAt(0) +1);
+      }
+    }
+  });
+}
+
 function randomize() {
   $("#rand-sort").addClass("active");
   $("#abc-sort").removeClass("active");
